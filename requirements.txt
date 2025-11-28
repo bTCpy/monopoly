@@ -1,0 +1,6 @@
+quart
+cashu
+hypercorn
+# These versions are critical for Cashu to work:
+environs==9.5.0
+marshmallow<4.0.0
