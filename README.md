@@ -71,11 +71,11 @@ If you want to host your own game server or develop features:
     cd monopoly
     ```
 
-3. **Create a virtual environment**
+3. **Create a virtual environment**  
    Install [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/install) or use the build in python [venvs](https://docs.python.org/3/library/venv.html).
 
 
-2.  **Install Dependencies**
+2.  **Install Dependencies**  
    If in venv:
     ```bash
     pip install -r requirements.txt
@@ -86,7 +86,7 @@ If you want to host your own game server or develop features:
     python main.py
     ```
 
-5.  **Play**
+5.  **Play**  
     Open your browser and navigate to `http://localhost:5000` respectively `http://127.0.0.1:5000/`.
 
 ---
