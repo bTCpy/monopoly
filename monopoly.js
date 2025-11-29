@@ -1069,7 +1069,7 @@ function Game() {
 
 				if (sq.house > 0) {
 					if (p.creditor !== 0) {
-						pcredit.money += sq.houseprice * 0.5 * sq.house;
+						pcredit.money += Math.round(sq.houseprice * 0.5 * sq.house);
 					}
 					sq.hotel = 0;
 					sq.house = 0;
@@ -1112,7 +1112,7 @@ function Player(name, color) {
 	this.name = name;
 	this.color = color;
 	this.position = 0;
-	this.money = 1500;
+	this.money = Math.round(1500 * GAME_SCALE);
 	this.creditor = -1;
 	this.jail = false;
 	this.jailroll = 0;
@@ -1593,8 +1593,8 @@ function updateOption() {
 
 		allGroupUnmortgaged = false;
 	} else {
-		document.getElementById("mortgagebutton").value = "Mortgage (⚡₿" + (sq.price * 0.5) + ")";
-		document.getElementById("mortgagebutton").title = "Mortgage " + sq.name + " for ⚡₿" + (sq.price * 0.5) + ".";
+		document.getElementById("mortgagebutton").value = "Mortgage (⚡₿" + Math.round(sq.price * 0.5) + ")";
+		document.getElementById("mortgagebutton").title = "Mortgage " + sq.name + " for ⚡₿" + Math.round(sq.price * 0.5) + ".";
 
 		if (sq.groupNumber >= 3) {
 			$("#buyhousebutton").show();
@@ -1603,9 +1603,9 @@ function updateOption() {
 			sellhousebutton.disabled = false;
 
 			buyhousebutton.value = "Buy house (⚡₿" + sq.houseprice + ")";
-			sellhousebutton.value = "Sell house (⚡₿" + (sq.houseprice * 0.5) + ")";
+			sellhousebutton.value = "Sell house (⚡₿" + Math.round(sq.houseprice * 0.5) + ")";
 			buyhousebutton.title = "Buy a house for ⚡₿" + sq.houseprice;
-			sellhousebutton.title = "Sell a house for ⚡₿" + (sq.houseprice * 0.5);
+			sellhousebutton.title = "Sell a house for ⚡₿" + Math.round(sq.houseprice * 0.5);
 
 			if (sq.house == 4) {
 				buyhousebutton.value = "Buy hotel (⚡₿" + sq.houseprice + ")";
@@ -1613,8 +1613,8 @@ function updateOption() {
 			}
 			if (sq.hotel == 1) {
 				$("#buyhousebutton").hide();
-				sellhousebutton.value = "Sell hotel (⚡₿" + (sq.houseprice * 0.5) + ")";
-				sellhousebutton.title = "Sell a hotel for ⚡₿" + (sq.houseprice * 0.5);
+				sellhousebutton.value = "Sell hotel (⚡₿" + Math.round(sq.houseprice * 0.5) + ")";
+				sellhousebutton.title = "Sell a hotel for ⚡₿" + Math.round(sq.houseprice * 0.5);
 			}
 
 			var maxhouse = 0;
@@ -1880,16 +1880,16 @@ function advance(destination, pass) {
 			p.position = pass;
 		} else {
 			p.position = pass;
-			p.money += 200;
-			addAlert(p.name + " collected a ⚡₿200 salary for passing GO.");
+			p.money += Math.round(200 * GAME_SCALE);
+			addAlert(p.name + " collected a ⚡₿" + Math.round(200 * GAME_SCALE) + " salary for passing GO.");
 		}
 	}
 	if (p.position < destination) {
 		p.position = destination;
 	} else {
 		p.position = destination;
-		p.money += 200;
-		addAlert(p.name + " collected a ⚡₿200 salary for passing GO.");
+		p.money += Math.round(200 * GAME_SCALE);
+		addAlert(p.name + " collected a ⚡₿" + Math.round(200 * GAME_SCALE) + " salary for passing GO.");
 	}
 
 	land();
@@ -1904,8 +1904,8 @@ function advanceToNearestUtility() {
 		p.position = 28;
 	} else if (p.position >= 28) {
 		p.position = 12;
-		p.money += 200;
-		addAlert(p.name + " collected a ⚡₿200 salary for passing GO.");
+		p.money += Math.round(200 * GAME_SCALE);
+		addAlert(p.name + " collected a ⚡₿" + Math.round(200 * GAME_SCALE) + " salary for passing GO.");
 	}
 
 	land(true);
@@ -1922,8 +1922,8 @@ function advanceToNearestRailroad() {
 		p.position = 25;
 	} else if (p.position >= 35) {
 		p.position = 5;
-		p.money += 200;
-		addAlert(p.name + " collected a ⚡₿200 salary for passing GO.");
+		p.money += Math.round(200 * GAME_SCALE);
+		addAlert(p.name + " collected a ⚡₿" + Math.round(200 * GAME_SCALE) + " salary for passing GO.");
 	}
 
 	land(true);
@@ -1958,6 +1958,7 @@ function streetrepairs(houseprice, hotelprice) {
 
 function payfifty() {
 	var p = player[turn];
+	var fine = Math.round(50 * GAME_SCALE);
 
 	document.getElementById("jail").style.border = '1px solid black';
 	document.getElementById("cell11").style.border = '2px solid ' + p.color;
@@ -1968,9 +1969,9 @@ function payfifty() {
 	p.jail = false;
 	p.jailroll = 0;
 	p.position = 10;
-	p.pay(50, 0);
+	p.pay(fine, 0);
 
-	addAlert(p.name + " paid the ⚡₿50 fine to get out of jail.");
+	addAlert(p.name + " paid the ⚡₿" + fine + " fine to get out of jail.");
 	updateMoney();
 	updatePosition();
 }
@@ -2080,7 +2081,7 @@ function sellHouse(index) {
 		addAlert(p.name + " sold a house on " + sq.name + ".");
 	}
 
-	p.money += sq.houseprice * 0.5;
+	p.money += Math.round(sq.houseprice * 0.5); 
 	updateOwned();
 	updateMoney();
 }
@@ -2174,10 +2175,14 @@ function showdeed(property) {
 	$("#deed-mortgaged").hide();
 	$("#deed-special").hide();
 
+    // FIX: Pre-calculate the rounded mortgage value
+    var mortgageVal = Math.round(sq.price * 0.5);
+
 	if (sq.mortgage) {
 		$("#deed-mortgaged").show();
 		document.getElementById("deed-mortgaged-name").textContent = sq.name;
-		document.getElementById("deed-mortgaged-mortgage").textContent = (sq.price / 2);
+        // FIX: Use rounded value
+		document.getElementById("deed-mortgaged-mortgage").textContent = mortgageVal;
 
 	} else {
 
@@ -2191,7 +2196,8 @@ function showdeed(property) {
 			document.getElementById("deed-rent3").textContent = sq.rent3;
 			document.getElementById("deed-rent4").textContent = sq.rent4;
 			document.getElementById("deed-rent5").textContent = sq.rent5;
-			document.getElementById("deed-mortgage").textContent = (sq.price / 2);
+            // FIX: Use rounded value
+			document.getElementById("deed-mortgage").textContent = mortgageVal;
 			document.getElementById("deed-houseprice").textContent = sq.houseprice;
 			document.getElementById("deed-hotelprice").textContent = sq.houseprice;
 
@@ -2199,13 +2205,15 @@ function showdeed(property) {
 			$("#deed-special").show();
 			document.getElementById("deed-special-name").textContent = sq.name;
 			document.getElementById("deed-special-text").innerHTML = utiltext();
-			document.getElementById("deed-special-mortgage").textContent = (sq.price / 2);
+            // FIX: Use rounded value
+			document.getElementById("deed-special-mortgage").textContent = mortgageVal;
 
 		} else if (sq.groupNumber == 1) {
 			$("#deed-special").show();
 			document.getElementById("deed-special-name").textContent = sq.name;
 			document.getElementById("deed-special-text").innerHTML = transtext();
-			document.getElementById("deed-special-mortgage").textContent = (sq.price / 2);
+            // FIX: Use rounded value
+			document.getElementById("deed-special-mortgage").textContent = mortgageVal;
 		}
 	}
 }
@@ -2318,10 +2326,12 @@ function land(increasedRent) {
 		// Railroads
 		if (p.position == 5 || p.position == 15 || p.position == 25 || p.position == 35) {
 			if (increasedRent) {
-				rent = 25;
+				rent = 25 * GAME_SCALE;
 			} else {
-				rent = 12.5;
+				rent = 12.5 * GAME_SCALE; 
 			}
+			
+			rent = Math.round(rent);
 
 			if (s.owner == square[5].owner) {
 				rent *= 2;
@@ -2338,16 +2348,16 @@ function land(increasedRent) {
 
 		} else if (p.position === 12) {
 			if (increasedRent || square[28].owner == s.owner) {
-				rent = (die1 + die2) * 10;
+				rent = (die1 + die2) * Math.round(10 * GAME_SCALE);
 			} else {
-				rent = (die1 + die2) * 4;
+				rent = (die1 + die2) * Math.round(4 * GAME_SCALE);
 			}
 
 		} else if (p.position === 28) {
 			if (increasedRent || square[12].owner == s.owner) {
-				rent = (die1 + die2) * 10;
+				rent = (die1 + die2) * Math.round(10 * GAME_SCALE);
 			} else {
-				rent = (die1 + die2) * 4;
+				rent = (die1 + die2) * Math.round(4 * GAME_SCALE);
 			}
 
 		} else {
@@ -2390,7 +2400,7 @@ function land(increasedRent) {
 		updatePosition();
 
 		if (p.human) {
-			popup("<div>Go to jail. Go directly to Jail. Do not pass GO. Do not collect ⚡₿200.</div>", gotojail);
+			popup("<div>Go to jail. Go directly to Jail. Do not pass GO. Do not collect ⚡₿" + Math.round(200 * GAME_SCALE) + ".</div>", gotojail);
 		} else {
 			gotojail();
 		}
@@ -2492,9 +2502,10 @@ function roll() {
 			land();
 		} else {
 			if (p.jailroll === 3) {
+				var fine = Math.round(50 * GAME_SCALE);
 
 				if (p.human) {
-					popup("<p>You must pay the ⚡₿50 fine.</p>", function() {
+					popup("<p>You must pay the ⚡₿" + fine + " fine.</p>", function() {
 						payfifty();
 						player[turn].position=10 + die1 + die2;
 						land();
@@ -2522,11 +2533,12 @@ function roll() {
 		// Move player
 		p.position += die1 + die2;
 
-		// Collect ⚡₿200 salary as you pass GO
+		// Collect salary as you pass GO
 		if (p.position >= 40) {
 			p.position -= 40;
-			p.money += 200;
-			addAlert(p.name + " collected a ⚡₿200 salary for passing GO.");
+			var salary = Math.round(200 * GAME_SCALE);
+			p.money += salary;
+			addAlert(p.name + " collected a ⚡₿" + salary + " salary for passing GO.");
 		}
 
 		land();
@@ -2568,7 +2580,9 @@ function play() {
 
 	if (p.jail) {
 		$("#landed").show();
-		document.getElementById("landed").innerHTML = "You are in jail.<input type='button' title='Pay ⚡₿50 fine to get out of jail immediately.' value='Pay ⚡₿50 fine' onclick='payfifty();' />";
+		var fine = Math.round(50 * GAME_SCALE);
+		document.getElementById("landed").innerHTML = "You are in jail.<input type='button' title='Pay ⚡₿" + fine + " fine to get out of jail immediately.' value='Pay ⚡₿" + fine + " fine' onclick='payfifty();' />";
+
 
 		if (p.communityChestJailCard || p.chanceJailCard) {
 			document.getElementById("landed").innerHTML += "<input type='button' id='gojfbutton' title='Use &quot;Get Out of Jail Free&quot; card.' onclick='useJailCard();' value='Use Card' />";
@@ -2581,7 +2595,7 @@ function play() {
 		else if (p.jailroll === 1)
 			addAlert("This is " + p.name + "'s second turn in jail.");
 		else if (p.jailroll === 2) {
-			document.getElementById("landed").innerHTML += "<div>NOTE: If you do not throw doubles after this roll, you <i>must</i> pay the ⚡₿50 fine.</div>";
+			document.getElementById("landed").innerHTML += "<div>NOTE: If you do not throw doubles after this roll, you <i>must</i> pay the ⚡₿" + fine + " fine.</div>";
 			addAlert("This is " + p.name + "'s third turn in jail.");
 		}
 
@@ -2620,7 +2634,8 @@ function setup() {
 
 	for (var i = 1; i <= pcount; i++) {
 		p = player[playerArray[i - 1]];
-
+		
+		p.money = Math.round(1500 * GAME_SCALE);
 
 		p.color = document.getElementById("player" + i + "color").value.toLowerCase();
 
