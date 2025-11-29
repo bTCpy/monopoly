@@ -33,15 +33,15 @@
                 <input type="number" id="player-count" value="2" min="2" max="8" style="padding:10px; font-size:1.2em; width:80px; text-align:center; border-radius:5px; border:none;">
             </div>
             <div style="text-align:left;">
-                <label style="color:#aaa; font-size:0.9em;">Buy-in (Sats)</label><br>
-                <input type="number" id="buyin-amount" value="1500" step="100" style="padding:10px; font-size:1.2em; width:120px; text-align:center; border-radius:5px; border:none;">
+                <label style="color:#aaa; font-size:0.9em;">Buy-in (sats)</label><br>
+                <input type="number" id="buyin-amount" value="1500" min="500" step="100" style="padding:10px; font-size:1.2em; width:120px; text-align:center; border-radius:5px; border:none;">
             </div>
         </div>
 
         <!-- ROW 2: MINT SELECTION -->
         <div style="text-align:left; margin-bottom: 20px;">
             <label style="color:#aaa; font-size:0.9em;">Select Mint</label><br>
-            <select id="mint-selector" onchange="toggleCustomMint()" style="width:100%; padding:10px; font-size:1.1em; border-radius:5px; border:none; margin-top:5px;">
+            <select id="mint-selector" onchange="onMintChange()" style="width:100%; padding:10px; font-size:1.1em; border-radius:5px; border:none; margin-top:5px;">
                 <option value="https://testnut.cashu.space">TestNut (Testnet)</option>
                 <option value="https://mint.minibits.cash/Bitcoin">Minibits (Bitcoin)</option>
                 <option value="http://localhost:3338">Local Docker (localhost:3338)</option>
@@ -78,37 +78,114 @@
 
     
     
+    
+    
 <script>
-    // --- GLOBAL VARIABLE TO STORE PLAYER COUNT ---
+    // --- GLOBAL STATE ---
     let chosenPlayerCount = 2; 
+    let currentMintMax = null; 
 
-    // --- UI LOGIC ---
+    // --- UI REFERENCES ---
     const pInput = document.getElementById("player-count");
     const aInput = document.getElementById("buyin-amount");
     const tDisplay = document.getElementById("total-display");
     const mintSelect = document.getElementById("mint-selector");
     const customInput = document.getElementById("custom-mint-input");
+    const startBtn = document.querySelector("button[onclick='confirmAndStart()']");
 
+    // --- 1. LIVE CALCULATION & VALIDATION ---
     function updateTotal() {
-        let val = parseInt(pInput.value) || 2;
-        if (val > 8) { val = 8; pInput.value = 8; }
-        if (val < 2) { val = 2; }
-        const amount = parseInt(aInput.value) || 0;
-        tDisplay.innerText = `Total Pot: ${val * amount} Sats`;
-    }
+        let players = parseInt(pInput.value) || 2;
+        if (players > 8) { players = 8; pInput.value = 8; }
+        if (players < 2) { players = 2; }
+        
+        let amount = parseInt(aInput.value) || 0;
+        const total = players * amount;
 
-    function toggleCustomMint() {
-        if (mintSelect.value === "custom") {
-            customInput.style.display = "block";
-            customInput.focus();
+        let msg = `Total Pot: ${total} sats`;
+        let color = "#4CAF50"; 
+        let isValid = true;
+
+        if (amount < 500) {
+            msg += " (Minimum buy-in per player is 500 sats.)";
+            color = "red";
+            isValid = false;
+        }
+
+        if (currentMintMax !== null && total > currentMintMax) {
+            msg += ` (Exceeds Mint Limit of ${currentMintMax})`;
+            color = "red";
+            isValid = false;
+        }
+
+        tDisplay.style.color = color;
+        tDisplay.innerText = msg;
+        
+        if (isValid) {
+            startBtn.disabled = false;
+            startBtn.style.opacity = "1";
+            startBtn.style.cursor = "pointer";
         } else {
-            customInput.style.display = "none";
+            startBtn.disabled = true;
+            startBtn.style.opacity = "0.5";
+            startBtn.style.cursor = "not-allowed";
         }
     }
 
+    // --- 2. FETCH MINT LIMITS ---
+    async function updateMintLimits() {
+        let url = mintSelect.value;
+        if (url === "custom") {
+            url = customInput.value.trim();
+            if (!url.startsWith("http")) return; 
+        }
+
+        tDisplay.style.color = "orange";
+        tDisplay.innerText = "Checking Mint Limits...";
+        startBtn.disabled = true;
+
+        try {
+            const response = await fetch('/api/mint_info', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ mint_url: url })
+            });
+            const data = await response.json();
+
+            if (data.max_amount) {
+                currentMintMax = data.max_amount;
+            } else {
+                currentMintMax = null; 
+            }
+        } catch (e) {
+            console.error("Failed to check limit", e);
+            currentMintMax = null; 
+        }
+        
+        updateTotal();
+    }
+
+    // --- EVENTS ---
     pInput.addEventListener('input', updateTotal);
     aInput.addEventListener('input', updateTotal);
+    
+    async function onMintChange() {
+        if (mintSelect.value === "custom") {
+            customInput.style.display = "block";
+            customInput.focus();
+            customInput.addEventListener('blur', updateMintLimits);
+        } else {
+            customInput.style.display = "none";
+            updateMintLimits();
+        }
+    }
 
+    // --- CRITICAL FIX: USE ADDEVENTLISTENER INSTEAD OF ONLOAD ---
+    window.addEventListener('load', function() {
+        updateMintLimits(); 
+    });
+    // ------------------------------------------------------------
+    
     // --- GAME START LOGIC ---
     async function skipPayment() {
         await fetch('/api/debug_skip', {method: 'POST'});
@@ -121,20 +198,18 @@
         
         if(chosenPlayerCount < 2) { alert("Minimum 2 players!"); return; }
         if(chosenPlayerCount > 8) { alert("Maximum 8 players!"); return; }
+        if(amountPerPlayer < 500) { alert("Minimum 500 sats!"); return; }
 
-        // Determine Mint URL
         let selectedMint = mintSelect.value;
-        if (selectedMint === "custom") {
-            selectedMint = customInput.value.trim();
-            if (!selectedMint.startsWith("http")) {
-                alert("Please enter a valid Mint URL (must start with http/https)");
-                return;
-            }
-        }
+        if (selectedMint === "custom") selectedMint = customInput.value.trim();
 
         const totalSats = chosenPlayerCount * amountPerPlayer;
         
-        // Hide config, show payment
+        if (currentMintMax && totalSats > currentMintMax) {
+            alert(`This amount exceeds the mint's limit of ${currentMintMax} sats.`);
+            return;
+        }
+
         document.getElementById("step-config").style.display = "none";
         document.getElementById("step-payment").style.display = "flex";
         document.getElementById("scan-instruction").innerText = `Scan to deposit ${totalSats} Sats`;
@@ -150,7 +225,6 @@
         statusText.innerText = "Connecting to Mint...";
 
         try {
-            // SEND AMOUNT AND MINT URL TO SERVER
             const response = await fetch('/api/buyin', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -166,13 +240,11 @@
             }
             const data = await response.json();
 
-            // Display QR
             qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${data.payment_request}`;
             qrImage.style.display = "block";
             statusText.innerText = "Waiting for payment...";
             statusText.style.color = "#fff";
 
-            // Poll for status
             let pollInterval = setInterval(async () => {
                 try {
                     const check = await fetch('/api/check_start', {method: 'POST'});
@@ -180,10 +252,26 @@
                     
                     if (checkData.status === "paid") {
                         clearInterval(pollInterval);
-                        
                         document.getElementById("buyin-modal").style.display = "none";
                         
-                        // Update & Lock Game Settings
+                        const amountPerPlayer = parseInt(aInput.value) || 1500;
+                        const newScale = amountPerPlayer / 1500;
+                        
+                        // 1. Re-initialize Logic
+                        initClassicEdition(newScale);
+                        // NOTE: corrections() REMOVED to prevent crash
+
+                        // 2. Refresh Visual Prices
+                        for (let i = 0; i < 40; i++) {
+                            const priceDiv = document.getElementById("enlarge" + i + "price");
+                            const squareData = square[i];
+                            if (priceDiv && squareData) {
+                                priceDiv.textContent = squareData.pricetext;
+                                if (i === 10 || i === 40 || i === 30 || i === 20) continue; 
+                            }
+                        }
+
+                        // 3. Lock Game Settings
                         const gameSelect = document.getElementById("playernumber");
                         if(gameSelect) {
                             gameSelect.value = chosenPlayerCount;
@@ -202,7 +290,6 @@
             console.error(e);
             statusText.innerText = "Error: " + e.message;
             statusText.style.color = "red";
-            // Show config again if it failed
             setTimeout(() => {
                 document.getElementById("step-payment").style.display = "none";
                 document.getElementById("step-config").style.display = "block";
@@ -210,6 +297,10 @@
         }
     }
 </script>
+
+  
+
+  
 
   
 
@@ -246,7 +337,7 @@
 		Note: This page will not function without JavaScript.
 	</p>
 
-	<div id="refresh" style="display: block;color: #F7931A;">
+	<div id="refresh" style="display: none; color: #F7931A;">
 		Refresh this page to start a new game.
 	</div>
 
@@ -448,7 +539,7 @@
 
 	<div id="setup">
 		<div style="margin-bottom: 20px;">
-			Selected number of players.
+			Selected number of players:
 			<select id="playernumber" title="Select the number of players for the game.">
 				<option>2</option>
 				<option>3</option>
@@ -672,7 +763,11 @@
 			<input type="button" value="Start Game" onclick="setup();" title="Begin playing." />
 		</div>
 
-		<div id="noF5">Note: Refreshing this page or navigating away from it may end your game without warning.</div>
+		<div id="noF5"> <b>Note:</b> Refreshing this page or navigating away from it may end your game without warning and you
+  <b>will lose your money</b> if you selected and payed a real mint.
+  <br>
+  <b>Disclaimer:</b> The pot is held custodially by the server for the duration of the game. Only play with amounts you can afford to lose.
+</div>
 	</div>
 
 	<div id="control">
