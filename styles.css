@@ -130,6 +130,15 @@ td {
 	font-size: 13px;
 	background-color: #000;
 	overflow-y: scroll;
+	overflow-x: hidden;
+	line-height: 1.4em; 
+}
+
+#alert div {
+	margin-bottom: 5px;       /* Spacing between messages */
+	white-space: normal;      /* CRITICAL: Allows text to wrap to the next line */
+	word-wrap: break-word;    /* CRITICAL: Breaks very long numbers if they don't fit */
+    	overflow-wrap: break-word; /* Modern standard for the above */
 }
 
 #manage {
