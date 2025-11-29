@@ -1,5 +1,6 @@
 import asyncio
 import os
+import httpx
 import shutil
 import gc  # Garbage Collector
 from quart import Quart, jsonify, request, send_from_directory
@@ -93,6 +94,46 @@ async def debug_skip():
     fake_proof = Proof(id="demo", amount=1000, secret="demo", C="02"+"00"*32)
     game_pot.append(fake_proof)
     return jsonify({"status": "skipped"})
+
+
+@app.route('/api/mint_info', methods=['POST'])
+async def get_mint_info():
+    data = await request.get_json()
+    mint_url = data.get('mint_url', "").rstrip('/')
+    
+    if not mint_url:
+        return jsonify({"error": "No URL provided"}), 400
+
+    try:
+        # Fetch /v1/info from the mint
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(f"{mint_url}/v1/info", timeout=5.0)
+            resp.raise_for_status()
+            info = resp.json()
+            
+            # Parse NUT-04 (Minting) settings to find max_amount
+            # Structure: nuts -> 4 -> methods -> [bolt11] -> max_amount
+            max_amount = None
+            
+            nuts = info.get('nuts', {})
+            nut4 = nuts.get('4', {}) # NUT-04 is for Minting
+            methods = nut4.get('methods', [])
+            
+            for m in methods:
+                if m.get('method') == 'bolt11' and m.get('unit') == 'sat':
+                    max_amount = m.get('max_amount')
+                    break
+            
+            # If not found or null, assume no limit (or very high)
+            if max_amount is None:
+                max_amount = 21000000000000 # 21M BTC (Effectively infinite)
+
+            return jsonify({"max_amount": max_amount})
+
+    except Exception as e:
+        print(f"⚠️ Could not fetch info from {mint_url}: {e}")
+        # If we can't talk to the mint, don't block the user, just warn them
+        return jsonify({"max_amount": 0, "error": str(e)})
 
 @app.route('/api/buyin', methods=['POST'])
 async def buyin():
@@ -194,6 +235,7 @@ async def check_start():
         if "paid" not in str(e) and "None" not in str(e): 
             print(f"⚠️ MINTING ERROR: {e}")
         return jsonify({"status": "waiting"})
+        
 
 @app.route('/api/cashout', methods=['POST'])
 async def cashout():
@@ -202,6 +244,13 @@ async def cashout():
     
     try:
         token = await wallet.serialize_proofs(game_pot)
+        
+        print("\n" + "="*50)
+        print("🎉 CASHOUT GENERATED!")
+        print(f"Amount: {sum(p.amount for p in game_pot)} sats")
+        print("Token:", token) # <--- Prints the cashuA... string to the terminal
+        print("="*50 + "\n")
+        
         game_pot.clear()
         return jsonify({"token": token})
     except Exception as e:
