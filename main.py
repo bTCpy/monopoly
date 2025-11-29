@@ -82,6 +82,27 @@ async def startup():
 async def index():
     return await send_from_directory('.', 'index.html')
 
+
+@app.route('/manifest.json')
+async def manifest():
+    # 'application/manifest+json' helps some browsers recognize it faster
+    response = await send_from_directory('.', 'manifest.json')
+    response.headers['Content-Type'] = 'application/manifest+json'
+    return response
+
+@app.route('/sw.js')
+async def service_worker():
+    # Service Workers must be served as javascript
+    response = await send_from_directory('.', 'sw.js')
+    response.headers['Content-Type'] = 'application/javascript'
+    # Disable caching for sw.js so updates to your code take effect immediately
+    response.headers['Cache-Control'] = 'no-cache' 
+    return response
+    
+@app.route('/favicon.ico')
+async def favicon():
+    return await send_from_directory('images', 'android-launchericon-192-192.png')
+
 @app.route('/<path:path>')
 async def serve_static(path):
     return await send_from_directory('.', path)
@@ -248,7 +269,7 @@ async def cashout():
         print("\n" + "="*50)
         print("🎉 CASHOUT GENERATED!")
         print(f"Amount: {sum(p.amount for p in game_pot)} sats")
-        print("Token:", token) # <--- Prints the cashuA... string to the terminal
+        print("Token:", token) # <--- Prints the cashuA... string to your terminal
         print("="*50 + "\n")
         
         game_pot.clear()
