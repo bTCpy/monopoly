@@ -15,6 +15,7 @@ Don't want to install anything? You can try the game right now on our test serve
 
 *Tip: Select "TestNut (Testnet)" in the game setup to play for free without spending real Bitcoin.*
 
+![Demo](gameplay_final_speed.gif)
 ---
 
 ## 👨‍👩‍👧‍👦 Why Play This?
@@ -26,7 +27,6 @@ This project is designed as a fun, interactive educational tool.
 *   **Micro-Stakes:** You can play with tiny amounts (e.g., 500 sats, which is a fraction of a Dollar). This makes the game feel "real" and exciting without huge financial risk.
 *   **Math Skills:** The game dynamically scales prices based on your buy-in. If you buy in with 3000 sats, all rents, salaries, and fines double automatically!
 
-![Demo](gameplay_final_speed.gif)
 ---
 
 ## ✨ Features
