@@ -8,7 +8,7 @@ const urlsToCache = [
   '/ai.js',
   '/images/chance_icon.png',
   '/images/community_chest_icon.png',
-  '/images/arrow.png',
+  /*'/images/arrow.png',
   '/images/arrow_icon.png',
   '/images/close.png',
   '/images/Die_1.png',
@@ -30,7 +30,7 @@ const urlsToCache = [
   '/images/tax_icon.png',
   '/images/train_icon.png',
   '/images/vert-bar.png',
-  '/images/water_icon.png'
+  '/images/water_icon.png'*/
 ];
 
 self.addEventListener('install', function(event) {
