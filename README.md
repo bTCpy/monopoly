@@ -74,7 +74,7 @@ If you want to host your own game server or develop features:
 
 3. **Create a virtual environment**  
    Install [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/install) or use the build in python [venvs](https://docs.python.org/3/library/venv.html).
-   ```bash
+    ```bash
     conda create -n myvirtualenv python=3.13
     conda activate myvirtualenv
     ```
