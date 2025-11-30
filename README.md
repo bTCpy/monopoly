@@ -35,6 +35,7 @@ This project is designed as a fun, interactive educational tool.
 *   **Automatic Invoices:** Generates Lightning invoices (BOLT11) for buy-ins.
 *   **Instant Settlement:** The game server manages the pot using a custodial Cashu wallet for speed and ease of use.
 *   **Cash Out:** At the end of the game, the winner receives a Cashu token containing the entire pot. Redeem it using your Cashu wallet of choice (e.g. [Cashu.me](https://wallet.cashu.me/))
+*   **Offline Mode:** Play offline by installing the app as a PWA directly from your browser.
 
 ---
 
@@ -73,10 +74,12 @@ If you want to host your own game server or develop features:
 
 3. **Create a virtual environment**  
    Install [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/install) or use the build in python [venvs](https://docs.python.org/3/library/venv.html).
-
+   ```bash
+    conda create -n myvirtualenv python=3.13
+    conda activate myvirtualenv
+    ```
 
 2.  **Install Dependencies**  
-   If in venv:
     ```bash
     pip install -r requirements.txt
     ```
