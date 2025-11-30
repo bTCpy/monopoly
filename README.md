@@ -4,7 +4,7 @@
 
 This project transforms the classic board game into a Bitcoin experience. It uses the [Cashu](https://github.com/cashubtc) protocol to handle game funds, allowing players to buy in using a Lightning wallet, play the game, and cash out the pot at the end.
 
-
+[![Watch the video](https://raw.githubusercontent.com/bTCpy/monopoly/main/thumbnail.png)](https://raw.githubusercontent.com/bTCpy/monopoly/main/invitation.mp4)
 ---
 
 ## 🎮 Try it Live!
