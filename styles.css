@@ -840,3 +840,30 @@ td {
 	width: 15px;
 
 }
+
+/* --- FOOTER & SOCIAL ICONS --- */
+#social-footer {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 25px; /* Space between icons */
+}
+
+.social-icon {
+    width: 32px;
+    height: 32px;
+    fill: #666; /* Default gray color */
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+
+.social-icon:hover {
+    transform: scale(1.1); /* Grow slightly on hover */
+}
+
+
+a[href*="github.com"] .social-icon:hover {
+    fill: #ffffff; /* White on hover */
+}
