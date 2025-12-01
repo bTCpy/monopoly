@@ -897,6 +897,54 @@
 			</tr>
 		</table>
 	</div>
+<!-- ================= CASHOUT MODAL START ================= -->
+<div id="cashout-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:100000; align-items:center; justify-content:center; flex-direction:column; text-align:center; font-family:sans-serif;">
+    
+    <h1 style="color: #4CAF50; font-size: 2.5em; margin: 0 0 20px 0;">🎉 YOU WON! 🎉</h1>
+    <p style="color: white; font-size: 1.2em;">Here is your Cashu Token:</p>
+    
+    <!-- The Token Text Box -->
+    <textarea id="token-display" readonly style="
+        width: 90%; 
+        max-width: 500px; 
+        height: 150px; 
+        padding: 15px; 
+        border-radius: 10px; 
+        border: 2px solid #4CAF50; 
+        background: #222; 
+        color: #0f0; 
+        font-family: monospace; 
+        font-size: 14px; 
+        resize: none; 
+        word-break: break-all;
+    "></textarea>
 
+    <!-- Buttons -->
+    <div style="margin-top: 20px; display: flex; gap: 15px;">
+        <button onclick="copyToken()" id="copy-btn" style="
+            padding: 15px 30px; 
+            font-size: 1.2em; 
+            background: #4CAF50; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold;
+        ">📋 Copy Token</button>
+        
+        <button onclick="location.reload()" style="
+            padding: 15px 30px; 
+            font-size: 1.2em; 
+            background: #444; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer;
+        ">🔄 New Game</button>
+    </div>
+
+    <p style="color: #888; margin-top: 20px; font-size: 0.9em;">Paste this token into your wallet (e.g. Minibits/Cashu.me) to claim funds.</p>
+</div>
+<!-- ================= CASHOUT MODAL END ================= -->
 </body>
 </html>
