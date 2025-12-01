@@ -2721,13 +2721,81 @@ function menuitem_onmouseout(element) {
 }
 
 async function triggerCashout() {
-    const response = await fetch('/api/cashout', {method: 'POST'});
-    const data = await response.json();
-    
-    // Display the winning token
-    alert("Use your Cashu Wallet to claim the pot:\n\n" + data.token);
-    console.log("WINNING TOKEN:", data.token);
+    try {
+        const response = await fetch('/api/cashout', {method: 'POST'});
+        const data = await response.json();
+
+        if (data.error) {
+            alert("Error: " + data.error);
+            return;
+        }
+        
+        // 1. Put token in the box
+        const tokenBox = document.getElementById("token-display");
+        tokenBox.value = data.token;
+        
+        // 2. Show the modal
+        const modal = document.getElementById("cashout-modal");
+        modal.style.display = "flex"; // "flex" centers the content
+        
+        // 3. Console log just in case
+        console.log("WINNING TOKEN:", data.token);
+
+    } catch (e) {
+        alert("Network Error: Could not cash out.");
+    }
 }
+
+function copyToken() {
+    const tokenBox = document.getElementById("token-display");
+    const copyBtn = document.getElementById("copy-btn");
+
+    // 1. Select the text (Required for the fallback method)
+    tokenBox.select();
+    tokenBox.setSelectionRange(0, 99999); // For mobile devices
+
+    // 2. Check if the modern Clipboard API is available
+    if (navigator.clipboard && window.isSecureContext) {
+        // --- MODERN METHOD (HTTPS / Localhost) ---
+        navigator.clipboard.writeText(tokenBox.value).then(() => {
+            showCopySuccess(copyBtn);
+        }).catch(err => {
+            console.error("Clipboard API failed, trying fallback...", err);
+            fallbackCopyText(copyBtn);
+        });
+    } else {
+        // --- FALLBACK METHOD (HTTP / Local Network) ---
+        // This is deprecated but is the ONLY way to copy on insecure connections
+        fallbackCopyText(copyBtn);
+    }
+}
+
+function fallbackCopyText(btn) {
+    try {
+        // This copies whatever is currently selected (which we did with tokenBox.select())
+        const successful = document.execCommand('copy');
+        if (successful) {
+            showCopySuccess(btn);
+        } else {
+            alert("Copy failed. Please copy the text manually.");
+        }
+    } catch (err) {
+        console.error('Fallback copy failed', err);
+        alert("Browser blocked copying. Please copy manually.");
+    }
+}
+
+function showCopySuccess(btn) {
+    btn.innerText = "✅ Copied!";
+    btn.style.background = "#2E7D32"; // Darker green
+    
+    // Reset button text after 3 seconds
+    setTimeout(() => {
+        btn.innerText = "📋 Copy Token";
+        btn.style.background = "#4CAF50";
+    }, 3000);
+}
+
 
 window.onload = function() {
 	game = new Game();
