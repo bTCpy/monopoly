@@ -75,14 +75,14 @@
         <button onclick="confirmAndStart()" style="margin-top: 10px; padding: 15px 40px; background: #ff9900; border: none; color: white; font-size: 1.2em; font-weight:bold; cursor: pointer; border-radius: 5px;">
             Generate Invoice
         </button>
-		<footer id="social-footer">
-		    <!-- GitHub Link -->
-		    <a href="https://github.com/bTCpy/monopoly" target="_blank" title="View Code on GitHub">
-		        <svg class="social-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-		            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.137 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-		        </svg>
-		    </a>
-		</footer>
+        <footer id="social-footer">
+    <!-- GitHub Link -->
+    <a href="https://github.com/bTCpy/monopoly" target="_blank" title="View Code on GitHub">
+        <svg class="social-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.137 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+        </svg>
+    </a>
+</footer>
     </div>
 
   
@@ -209,7 +209,17 @@
 
     // --- CRITICAL FIX: USE ADDEVENTLISTENER INSTEAD OF ONLOAD ---
     window.addEventListener('load', function() {
-        updateMintLimits(); 
+        updateMintLimits();
+		for (let i = 1; i <= 8; i++) {
+        updateBorderColor(i);
+    	}
+		// Activate dragging for the money bar
+		const moneyBar = document.getElementById("moneybarwrap");
+		if (moneyBar) {
+			makeDraggable(moneyBar);
+		}
+		const controlPanel = document.getElementById("control");
+		if (controlPanel) makeDraggable(controlPanel); 
     });
     // ------------------------------------------------------------
     
@@ -299,14 +309,19 @@
                         }
 
                         // 3. Lock Game Settings
-                        const gameSelect = document.getElementById("playernumber");
-                        if(gameSelect) {
-                            gameSelect.value = chosenPlayerCount;
-                            if (window.jQuery) { $(gameSelect).change(); } 
-                            else { gameSelect.dispatchEvent(new Event('change')); }
-                            gameSelect.disabled = true;
-                            gameSelect.style.backgroundColor = "#e0e0e0";
-                        }
+                        const gameInput = document.getElementById("playernumber");
+						const visualCount = document.getElementById("visible-player-count");
+                        if(gameInput) {
+							// 1. Set the hidden value so monopoly.js knows how many players
+							gameInput.value = chosenPlayerCount;
+							
+							// 2. Update the visual text so the user sees "Players Joined: 4"
+							if(visualCount) visualCount.innerText = chosenPlayerCount;
+
+							// 3. Trigger the logic to show/hide the correct player name inputs
+							// (Since it's now an input, onchange isn't automatic when setting .value via JS)
+							playernumber_onchange(); 
+						}
 
                         alert(`⚡ PAYMENT RECEIVED! \n\nConnected to: ${mintUrl}\nPot Size: ${checkData.pot_size} sats`);
                     }
@@ -565,246 +580,220 @@
 	</div>
 
 	<div id="setup">
-		<div style="margin-bottom: 20px;">
-			Selected number of players:
-			<select id="playernumber" title="Select the number of players for the game.">
-				<option>2</option>
-				<option>3</option>
-				<option selected="selected">4</option>
-				<option>5</option>
-				<option>6</option>
-				<option>7</option>
-				<option>8</option>
-			</select>
-		</div>
+		<div class="lobby-card">
+			<div class="lobby-title">⚡ Game Setup</div>
 
-		<div id="player1input" class="player-input">
-			Player 1: <input type="text" id="player1name" title="Player name" maxlength="16" value="Player 1" />
-			<select id="player1color" title="Player color">
-				<option style="color: aqua;">Aqua</option>
-				<option style="color: black;">Black</option>
-				<option style="color: blue;">Blue</option>
-				<option style="color: fuchsia;">Fuchsia</option>
-				<option style="color: gray;">Gray</option>
-				<option style="color: green;">Green</option>
-				<option style="color: lime;">Lime</option>
-				<option style="color: maroon;">Maroon</option>
-				<option style="color: navy;">Navy</option>
-				<option style="color: olive;">Olive</option>
-				<option style="color: orange;">Orange</option>
-				<option style="color: purple;">Purple</option>
-				<option style="color: red;">Red</option>
-				<option style="color: silver;">Silver</option>
-				<option style="color: teal;">Teal</option>
-				<option selected="selected" style="color: yellow;">Yellow</option>
-			</select>
-			<select id="player1ai" title="Choose whether this player is controled by a human or by the computer." onclick="document.getElementById('player1name').disabled = this.value !== '0';">
-				<option value="0" selected="selected">Human</option>
-				<option value="1">AI (Test)</option>
-			</select>
-		</div>
+    
+			<!-- VISUAL DISPLAY (For the user to see) -->
+			<div class="stat-box">
+				<span class="stat-label">Players Joined</span>
+				<span class="stat-value" id="visible-player-count">4</span>
+			</div>
 
-		<div id="player2input" class="player-input">
-			Player 2: <input type="text" id="player2name" title="Player name" maxlength="16" value="Player 2" />
-			<select id="player2color" title="Player color">
-				<option style="color: aqua;">Aqua</option>
-				<option style="color: black;">Black</option>
-				<option selected="selected" style="color: blue;">Blue</option>
-				<option style="color: fuchsia;">Fuchsia</option>
-				<option style="color: gray;">Gray</option>
-				<option style="color: green;">Green</option>
-				<option style="color: lime;">Lime</option>
-				<option style="color: maroon;">Maroon</option>
-				<option style="color: navy;">Navy</option>
-				<option style="color: olive;">Olive</option>
-				<option style="color: orange;">Orange</option>
-				<option style="color: purple;">Purple</option>
-				<option style="color: red;">Red</option>
-				<option style="color: silver;">Silver</option>
-				<option style="color: teal;">Teal</option>
-				<option style="color: yellow;">Yellow</option>
-			</select>
-			<select id="player2ai" title="Choose whether this player is controled by a human or by the computer." onclick="document.getElementById('player2name').disabled = this.value !== '0';">
-				<option value="0" selected="selected">Human</option>
-				<option value="1">AI (Test)</option>
-			</select>
-		</div>
+			<!-- HIDDEN LOGIC INPUT (To keep the game engine happy) -->
+			<!-- We keep the ID 'playernumber' so existing scripts can still read .value -->
+			<input type="hidden" id="playernumber" value="4" onchange="playernumber_onchange();">
 
-		<div id="player3input" class="player-input">
-			Player 3: <input type="text" id="player3name" title="Player name" maxlength="16" value="Player 3" />
-			<select id="player3color" title="Player color">
-				<option style="color: aqua;">Aqua</option>
-				<option style="color: black;">Black</option>
-				<option style="color: blue;">Blue</option>
-				<option style="color: fuchsia;">Fuchsia</option>
-				<option style="color: gray;">Gray</option>
-				<option style="color: green;">Green</option>
-				<option style="color: lime;">Lime</option>
-				<option style="color: maroon;">Maroon</option>
-				<option style="color: navy;">Navy</option>
-				<option style="color: olive;">Olive</option>
-				<option style="color: orange;">Orange</option>
-				<option style="color: purple;">Purple</option>
-				<option selected="selected" style="color: red;">Red</option>
-				<option style="color: silver;">Silver</option>
-				<option style="color: teal;">Teal</option>
-				<option style="color: yellow;">Yellow</option>
-			</select>
-			<select id="player3ai" title="Choose whether this player is controled by a human or by the computer." onclick="document.getElementById('player3name').disabled = this.value !== '0';">
-				<option value="0" selected="selected">Human</option>
-				<option value="1">AI (Test)</option>
-			</select>
-		</div>
+  
 
-		<div id="player4input" class="player-input">
-			Player 4: <input type="text" id="player4name" title="Player name" maxlength="16" value="Player 4" />
-			<select id="player4color" title="Player color">
-				<option style="color: aqua;">Aqua</option>
-				<option style="color: black;">Black</option>
-				<option style="color: blue;">Blue</option>
-				<option style="color: fuchsia;">Fuchsia</option>
-				<option style="color: gray;">Gray</option>
-				<option style="color: green;">Green</option>
-				<option selected="selected" style="color: lime;">Lime</option>
-				<option style="color: maroon;">Maroon</option>
-				<option style="color: navy;">Navy</option>
-				<option style="color: olive;">Olive</option>
-				<option style="color: orange;">Orange</option>
-				<option style="color: purple;">Purple</option>
-				<option style="color: red;">Red</option>
-				<option style="color: silver;">Silver</option>
-				<option style="color: teal;">Teal</option>
-				<option style="color: yellow;">Yellow</option>
-			</select>
-			<select id="player4ai" title="Choose whether this player is controled by a human or by the computer." onclick="document.getElementById('player4name').disabled = this.value !== '0';">
-				<option value="0" selected="selected">Human</option>
-				<option value="1">AI (Test)</option>
-			</select>
-		</div>
+			    
+			<!-- Player 1 Config -->
+			<div id="player1input" class="player-input">
+				<label style="font-size:0.8em; color:#aaa;">Player 1 Name</label>
+				<input type="text" id="player1name" maxlength="16" value="Player 1" />
+				
+				<div style="display:flex; gap:10px;">
+					<select id="player1color" style="flex:1;" onchange="handleColorChange(1)">
+						<option style="color: yellow;" selected>Yellow</option>
+						<option style="color: blue;">Blue</option>
+						<option style="color: red;">Red</option>
+						<option style="color: lime;">Lime</option>
+						<option style="color: green;">Green</option>
+						<option style="color: aqua;">Aqua</option>
+						<option style="color: orange;">Orange</option>
+						<option style="color: purple;">Purple</option>
+					</select>
+					<select id="player1ai" style="flex:1;" onclick="document.getElementById('player1name').disabled = this.value !== '0';">
+						<option value="0" selected>Human</option>
+						<option value="1">AI (Bot)</option>
+					</select>
+				</div>
+			</div>
 
-		<div id="player5input" class="player-input">
-			Player 5: <input type="text" id="player5name" title="Player name" maxlength="16" value="Player 5" />
-			<select id="player5color" title="Player color">
-				<option style="color: aqua;">Aqua</option>
-				<option style="color: black;">Black</option>
-				<option style="color: blue;">Blue</option>
-				<option style="color: fuchsia;">Fuchsia</option>
-				<option style="color: gray;">Gray</option>
-				<option selected="selected" style="color: green;">Green</option>
-				<option style="color: lime;">Lime</option>
-				<option style="color: maroon;">Maroon</option>
-				<option style="color: navy;">Navy</option>
-				<option style="color: olive;">Olive</option>
-				<option style="color: orange;">Orange</option>
-				<option style="color: purple;">Purple</option>
-				<option style="color: red;">Red</option>
-				<option style="color: silver;">Silver</option>
-				<option style="color: teal;">Teal</option>
-				<option style="color: yellow;">Yellow</option>
-			</select>
-			<select id="player5ai" title="Choose whether this player is controled by a human or by the computer." onclick="document.getElementById('player5name').disabled = this.value !== '0';">
-				<option value="0" selected="selected">Human</option>
-				<option value="1">AI (Test)</option>
-			</select>
-		</div>
+			<!-- Player 2 Config -->
+			<div id="player2input" class="player-input">
+				<label style="font-size:0.8em; color:#aaa;">Player 2 Name</label>
+				<input type="text" id="player2name" maxlength="16" value="Player 2" />
+				<div style="display:flex; gap:10px;">
+					<select id="player2color" style="flex:1;" onchange="handleColorChange(2)">
+						<option style="color: blue;" selected>Blue</option>
+						<option style="color: yellow;">Yellow</option>
+						<option style="color: red;">Red</option>
+						<option style="color: lime;">Lime</option>
+						<option style="color: green;">Green</option>
+						<option style="color: aqua;">Aqua</option>
+						<option style="color: orange;">Orange</option>
+						<option style="color: purple;">Purple</option>
+					</select>
+					<select id="player2ai" style="flex:1;" onclick="document.getElementById('player2name').disabled = this.value !== '0';">
+						<option value="0" selected>Human</option>
+						<option value="1">AI (Bot)</option>
+					</select>
+				</div>
+			</div>
 
-		<div id="player6input" class="player-input">
-			Player 6: <input type="text" id="player6name" title="Player name" maxlength="16" value="Player 6" />
-			<select id="player6color" title="Player color">
-				<option selected="selected" style="color: aqua;">Aqua</option>
-				<option style="color: black;">Black</option>
-				<option style="color: blue;">Blue</option>
-				<option style="color: fuchsia;">Fuchsia</option>
-				<option style="color: gray;">Gray</option>
-				<option style="color: green;">Green</option>
-				<option style="color: lime;">Lime</option>
-				<option style="color: maroon;">Maroon</option>
-				<option style="color: navy;">Navy</option>
-				<option style="color: olive;">Olive</option>
-				<option style="color: orange;">Orange</option>
-				<option style="color: purple;">Purple</option>
-				<option style="color: red;">Red</option>
-				<option style="color: silver;">Silver</option>
-				<option style="color: teal;">Teal</option>
-				<option style="color: yellow;">Yellow</option>
-			</select>
-			<select id="player6ai" title="Choose whether this player is controled by a human or by the computer." onclick="document.getElementById('player6name').disabled = this.value !== '0';">
-				<option value="0" selected="selected">Human</option>
-				<option value="1">AI (Test)</option>
-			</select>
-		</div>
+			<!-- Player 3 Config -->
+			<div id="player3input" class="player-input">
+				<label style="font-size:0.8em; color:#aaa;">Player 3 Name</label>
+				<input type="text" id="player3name" maxlength="16" value="Player 3" />
+				<div style="display:flex; gap:10px;">
+					<select id="player3color" style="flex:1;" onchange="handleColorChange(3)">
+						<option style="color: red;" selected>Red</option>
+						<option style="color: yellow;">Yellow</option>
+						<option style="color: blue;">Blue</option>
+						<option style="color: lime;">Lime</option>
+						<option style="color: green;">Green</option>
+						<option style="color: aqua;">Aqua</option>
+						<option style="color: orange;">Orange</option>
+						<option style="color: purple;">Purple</option>
+					</select>
+					<select id="player3ai" style="flex:1;" onclick="document.getElementById('player3name').disabled = this.value !== '0';">
+						<option value="0" selected>Human</option>
+						<option value="1">AI (Bot)</option>
+					</select>
+				</div>
+			</div>
 
-		<div id="player7input" class="player-input">
-			Player 7: <input type="text" id="player7name" title="Player name" maxlength="16" value="Player 7" />
-			<select id="player7color" title="Player color">
-				<option style="color: aqua;">Aqua</option>
-				<option style="color: black;">Black</option>
-				<option style="color: blue;">Blue</option>
-				<option style="color: fuchsia;">Fuchsia</option>
-				<option style="color: gray;">Gray</option>
-				<option style="color: green;">Green</option>
-				<option style="color: lime;">Lime</option>
-				<option style="color: maroon;">Maroon</option>
-				<option style="color: navy;">Navy</option>
-				<option style="color: olive;">Olive</option>
-				<option selected="selected" style="color: orange;">Orange</option>
-				<option style="color: purple;">Purple</option>
-				<option style="color: red;">Red</option>
-				<option style="color: silver;">Silver</option>
-				<option style="color: teal;">Teal</option>
-				<option style="color: yellow;">Yellow</option>
-			</select>
-			<select id="player7ai" title="Choose whether this player is controled by a human or by the computer." onclick="document.getElementById('player7name').disabled = this.value !== '0';">
-				<option value="0" selected="selected">Human</option>
-				<option value="1">AI (Test)</option>
-			</select>
-		</div>
+			<!-- Player 4 Config -->
+			<div id="player4input" class="player-input">
+				<label style="font-size:0.8em; color:#aaa;">Player 4 Name</label>
+				<input type="text" id="player4name" maxlength="16" value="Player 4" />
+				<div style="display:flex; gap:10px;">
+					<select id="player4color" style="flex:1;" onchange="handleColorChange(4)">
+						<option style="color: lime;" selected>Lime</option>
+						<option style="color: yellow;">Yellow</option>
+						<option style="color: blue;">Blue</option>
+						<option style="color: red;">Red</option>
+						<option style="color: green;">Green</option>
+						<option style="color: aqua;">Aqua</option>
+						<option style="color: orange;">Orange</option>
+						<option style="color: purple;">Purple</option>
+					</select>
+					<select id="player4ai" style="flex:1;" onclick="document.getElementById('player4name').disabled = this.value !== '0';">
+						<option value="0" selected>Human</option>
+						<option value="1">AI (Bot)</option>
+					</select>
+				</div>
+			</div>
 
-		<div id="player8input" class="player-input">
-			Player 8: <input type="text" id="player8name" title="Player name" maxlength="16" value="Player 8" />
-			<select id="player8color" title="Player color">
-				<option style="color: aqua;">Aqua</option>
-				<option style="color: black;">Black</option>
-				<option style="color: blue;">Blue</option>
-				<option style="color: fuchsia;">Fuchsia</option>
-				<option style="color: gray;">Gray</option>
-				<option style="color: green;">Green</option>
-				<option style="color: lime;">Lime</option>
-				<option style="color: maroon;">Maroon</option>
-				<option style="color: navy;">Navy</option>
-				<option style="color: olive;">Olive</option>
-				<option style="color: orange;">Orange</option>
-				<option selected="selected" style="color: purple;">Purple</option>
-				<option style="color: red;">Red</option>
-				<option style="color: silver;">Silver</option>
-				<option style="color: teal;">Teal</option>
-				<option style="color: yellow;">Yellow</option>
-			</select>
-			<select id="player8ai" title="Choose whether this player is controled by a human or by the computer." onclick="document.getElementById('player8name').disabled = this.value !== '0';">
-				<option value="0" selected="selected">Human</option>
-				<option value="1">AI (Test)</option>
-			</select>
-		</div>
+			<!-- Player 5 Config -->
+			<div id="player5input" class="player-input">
+				<label style="font-size:0.8em; color:#aaa;">Player 5 Name</label>
+				<input type="text" id="player5name" maxlength="16" value="Player 5" />
+				<div style="display:flex; gap:10px;">
+					<select id="player5color" style="flex:1;" onchange="handleColorChange(5)">
+						<option style="color: green;" selected>Green</option>
+						<option style="color: yellow;">Yellow</option>
+						<option style="color: blue;">Blue</option>
+						<option style="color: red;">Red</option>
+						<option style="color: lime;">Lime</option>
+						<option style="color: aqua;">Aqua</option>
+						<option style="color: orange;">Orange</option>
+						<option style="color: purple;">Purple</option>
+					</select>
+					<select id="player5ai" style="flex:1;" onclick="document.getElementById('player5name').disabled = this.value !== '0';">
+						<option value="0" selected>Human</option>
+						<option value="1">AI (Bot)</option>
+					</select>
+				</div>
+			</div>
 
-		<div style="margin: 20px 0px;">
-			<input type="button" value="Start Game" onclick="setup();" title="Begin playing." />
-		</div>
+			<!-- Player 6 Config -->
+			<div id="player6input" class="player-input">
+				<label style="font-size:0.8em; color:#aaa;">Player 6 Name</label>
+				<input type="text" id="player6name" maxlength="16" value="Player 6" />
+				<div style="display:flex; gap:10px;">
+					<select id="player6color" style="flex:1;" onchange="handleColorChange(6)">
+						<option style="color: aqua;" selected>Aqua</option>
+						<option style="color: yellow;">Yellow</option>
+						<option style="color: blue;">Blue</option>
+						<option style="color: red;">Red</option>
+						<option style="color: lime;">Lime</option>
+						<option style="color: green;">Green</option>
+						<option style="color: orange;">Orange</option>
+						<option style="color: purple;">Purple</option>
+					</select>
+					<select id="player6ai" style="flex:1;" onclick="document.getElementById('player6name').disabled = this.value !== '0';">
+						<option value="0" selected>Human</option>
+						<option value="1">AI (Bot)</option>
+					</select>
+				</div>
+			</div>
 
-		<div id="noF5"> <b>Note:</b> Refreshing this page or navigating away from it may end your game without warning and you
-  <b>will lose your money</b> if you selected and payed a real mint.
-  <br>
-  <b>Disclaimer:</b> The pot is held custodially by the server for the duration of the game. Only play with amounts you can afford to lose.
-</div>
-	<footer id="social-footer">
-		<!-- GitHub Link -->
-		<a href="https://github.com/bTCpy/monopoly" target="_blank" title="View Code on GitHub">
-			<svg class="social-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-				<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.137 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-			</svg>
-		</a>
-	</footer>
+			<!-- Player 7 Config -->
+			<div id="player7input" class="player-input">
+				<label style="font-size:0.8em; color:#aaa;">Player 7 Name</label>
+				<input type="text" id="player7name" maxlength="16" value="Player 7" />
+				<div style="display:flex; gap:10px;">
+					<select id="player7color" style="flex:1;" onchange="handleColorChange(7)">
+						<option style="color: orange;" selected>Orange</option>
+						<option style="color: yellow;">Yellow</option>
+						<option style="color: blue;">Blue</option>
+						<option style="color: red;">Red</option>
+						<option style="color: lime;">Lime</option>
+						<option style="color: green;">Green</option>
+						<option style="color: aqua;">Aqua</option>
+						<option style="color: purple;">Purple</option>
+					</select>
+					<select id="player7ai" style="flex:1;" onclick="document.getElementById('player7name').disabled = this.value !== '0';">
+						<option value="0" selected>Human</option>
+						<option value="1">AI (Bot)</option>
+					</select>
+				</div>
+			</div>
+
+			<!-- Player 8 Config -->
+			<div id="player8input" class="player-input">
+				<label style="font-size:0.8em; color:#aaa;">Player 8 Name</label>
+				<input type="text" id="player8name" maxlength="16" value="Player 8" />
+				<div style="display:flex; gap:10px;">
+					<select id="player8color" style="flex:1;" onchange="handleColorChange(8)">
+						<option style="color: purple;" selected>Purple</option>
+						<option style="color: yellow;">Yellow</option>
+						<option style="color: blue;">Blue</option>
+						<option style="color: red;">Red</option>
+						<option style="color: lime;">Lime</option>
+						<option style="color: green;">Green</option>
+						<option style="color: aqua;">Aqua</option>
+						<option style="color: orange;">Orange</option>
+					</select>
+					<select id="player8ai" style="flex:1;" onclick="document.getElementById('player8name').disabled = this.value !== '0';">
+						<option value="0" selected>Human</option>
+						<option value="1">AI (Bot)</option>
+					</select>
+				</div>
+			</div>
+
+			<!-- Start Button -->
+			<input type="button" value="START GAME" class="start-btn" onclick="setup();" />
+
+			<!-- New Disclaimer Box -->
+			<div class="disclaimer-box">
+				<span class="disclaimer-title">⚠️ Important Warning</span>
+				Do not refresh the page during gameplay or you will lose your game state.
+				<br><br>
+				Funds are held custodially by the server. Only play with small amounts you can afford to lose.
+			</div>
+			<footer id="social-footer">
+				<!-- GitHub Link -->
+				<a href="https://github.com/bTCpy/monopoly" target="_blank" title="View Code on GitHub">
+					<svg class="social-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+						<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.137 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+					</svg>
+				</a>
+			</footer>
+		</div>
 	</div>
-
 	<div id="control">
 		<table>
 			<tr>
@@ -897,6 +886,7 @@
 			</tr>
 		</table>
 	</div>
+    
 <!-- ================= CASHOUT MODAL START ================= -->
 <div id="cashout-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:100000; align-items:center; justify-content:center; flex-direction:column; text-align:center; font-family:sans-serif;">
     
