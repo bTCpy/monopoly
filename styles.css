@@ -41,12 +41,21 @@ td {
 }
 
 #moneybarwrap {
-	position: absolute;
-	min-width: 135px;
-	top: 0px;
-	right: 0px;
-	-webkit-user-select: none;
-	user-select: none;
+    position: absolute;
+    top: 10px;       /* Give it a little spacing from top */
+    right: 10px;     /* Initial position */
+    width: auto;     /* Let it grow with content */
+    min-width: 135px;
+    z-index: 2000;   /* Ensure it floats above everything */
+    
+    /* Make it look interactive */
+    cursor: move;    
+    -webkit-user-select: none;
+    user-select: none;
+    
+    /* Optional: Add a shadow so it pops out */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
+    border-radius: 5px;
 }
 
 #propertystats {
@@ -866,4 +875,223 @@ td {
 
 a[href*="github.com"] .social-icon:hover {
     fill: #ffffff; /* White on hover */
+}
+
+/* 1. Background & Centering */
+#setup {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; 
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+    z-index: 9999;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: white;
+    
+    /* --- THE FIX START --- */
+    display: flex;
+    flex-direction: column;
+    align-items: center;      /* Center horizontally */
+    justify-content: flex-start; /* Start stacking from the top (Fixes the cutoff) */
+    overflow-y: auto;         /* Allow vertical scrolling */
+    padding: 40px 20px;       /* Add breathing room at top and bottom */
+    box-sizing: border-box;
+    /* --- THE FIX END --- */
+}
+
+/* 2. The Game Lobby Card */
+.lobby-card {
+    background: #2a2a2a;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border: 1px solid #444;
+    width: 100%;
+    max-width: 500px; /* Limits width on desktop */
+    text-align: center;
+    margin: auto;
+}
+
+/* 3. Titles and Labels */
+.lobby-title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #ff9900; /* Bitcoin Orange */
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.lobby-label {
+    display: block;
+    text-align: left;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+/* 4. Inputs & Selects */
+#playernumber, .player-input input, .player-input select {
+    width: 94%;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+    transition: border 0.3s;
+}
+
+#playernumber:focus, .player-input input:focus, .player-input select:focus {
+    border-color: #ff9900;
+}
+
+/* 5. Player Rows Layout */
+.player-input {
+    display: none; /* JS toggles this */
+    background: #333;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    text-align: left;
+    border-left: 5px solid #555; /* Default accent */
+}
+
+/* Color Coded Borders for Players (Optional Polish) */
+#player1input { border-left-color: yellow; }
+#player2input { border-left-color: blue; }
+#player3input { border-left-color: red; }
+#player4input { border-left-color: lime; }
+#player5input { border-left-color: green; }
+#player6input { border-left-color: aqua; }
+#player7input { border-left-color: orange; }
+#player8input { border-left-color: purple; }
+
+/* 6. The Start Button */
+.start-btn {
+    width: 100%;
+    padding: 15px;
+    margin-top: 20px;
+    background: #ff9900;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 50px; /* Pill shape */
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+    box-shadow: 0 4px 15px rgba(255, 153, 0, 0.3);
+}
+
+.start-btn:hover {
+    background: #e68a00;
+    transform: translateY(-2px);
+}
+
+.start-btn:active {
+    transform: translateY(0);
+}
+
+/* 7. Disclaimer Box */
+.disclaimer-box {
+    margin-top: 25px;
+    background: rgba(255, 165, 0, 0.1);
+    border: 1px solid rgba(255, 165, 0, 0.3);
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #ddd;
+    line-height: 1.4;
+    text-align: left;
+}
+
+.disclaimer-title {
+    color: #ff9900;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+.stat-box {
+    background: #222;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.stat-label {
+    color: #aaa;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.stat-value {
+    color: #ff9900; /* Bitcoin Orange */
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255, 153, 0, 0.3);
+}
+
+@media only screen and (max-width: 1000px) {
+
+    /* 1. Pin Control Panel to Bottom of Screen */
+    #control {
+        position: fixed; /* Pins to the "Glass" of the screen */
+        bottom: 10px;
+        left: 10px;
+        
+        width: fit-content;
+        height: fit-content;
+        max-width: 100%; 
+        
+ 
+        border: 2px solid #ff9900; /* Nice orange accent */
+        border-radius: 12px; /* Rounded corners look better for floating widgets */
+        z-index: 5000; /* Ensure it sits ON TOP of everything */
+        
+        /* Layout adjustments for the panel content */
+        display: flex;
+        flex-direction: column;
+        padding: 10px;
+        /*box-sizing: border-box; */
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+        
+         /* User Interaction settings */
+        touch-action: none; /* Critical: Prevents browser scrolling when touching this */
+        user-select: none;
+    }
+
+    /* 2. Create Space at Bottom of Page */
+    /* This is CRITICAL. Without this, the Control Panel will cover 
+       the bottom row (Jail, Light Blue, etc.) and you won't be able 
+       to see them. */
+    body {
+        padding-bottom: 200px; /* Adjust this number based on how tall your panel is */
+    }
+
+    /* 3. Tweak the internal layout of controls for mobile */
+    #control table {
+        width: 100%;
+    }
+    
+    /* Limit the height of the alert box so the panel doesn't take up the whole screen */
+    #alert {
+        height: 80px; 
+        font-size: 13px;
+    }
+}
+
+#popupbackground {
+    z-index: 6000 !important;
+}
+
+#popupwrap {
+    z-index: 6001 !important;
 }
