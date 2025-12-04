@@ -68,6 +68,10 @@ function Game() {
 
 		$("#popupbackground").hide();
 		$("#popupwrap").hide();
+		
+	        if (window.innerWidth <= 1000) {
+            	$("#control").show();
+        	}
 
 		if (!game.auction()) {
 			play();
@@ -1255,6 +1259,8 @@ function popup(HTML, action, option) {
 		$("#popupyes, #popupno").on("click", function() {
 			$("#popupwrap").hide();
 			$("#popupbackground").fadeOut(400);
+			
+		if (window.innerWidth <= 1000) $("#control").show();
 		});
 
 		$("#popupyes").on("click", action);
@@ -1267,6 +1273,7 @@ function popup(HTML, action, option) {
 		$("#popupclose").on("click", function() {
 			$("#popupwrap").hide();
 			$("#popupbackground").fadeOut(400);
+		if (window.innerWidth <= 1000) $("#control").show();
 		}).on("click", action);
 
 	}
@@ -1274,6 +1281,20 @@ function popup(HTML, action, option) {
 	// Show using animation.
 	$("#popupbackground").fadeIn(400, function() {
 		$("#popupwrap").show();
+		
+	// --- AUTO-SCROLL TO POPUP ON MOBILE ---
+        if (window.innerWidth <= 1000) {
+            var popupElement = document.getElementById("popupwrap");
+            if (popupElement) {
+                popupElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center',
+                    inline: 'center'
+                });
+            }
+            
+            $("#control").hide();
+        }
 	});
 
 }
@@ -2292,6 +2313,7 @@ function land(increasedRent) {
 	increasedRent = !!increasedRent; // Cast increasedRent to a boolean value. It is used for the ADVANCE TO THE NEAREST RAILROAD/UTILITY Chance cards.
 
 	var p = player[turn];
+	centerOnPlayer();
 	var s = square[p.position];
 
 	var die1 = game.getDie(1);
@@ -2620,6 +2642,8 @@ function play() {
 			game.next();
 		}
 	}
+	
+	centerOnPlayer(); 
 }
 
 function setup() {
@@ -2785,6 +2809,56 @@ function fallbackCopyText(btn) {
     }
 }
 
+function updateBorderColor(playerNum) {
+    const inputDiv = document.getElementById(`player${playerNum}input`);
+    const colorSelect = document.getElementById(`player${playerNum}color`);
+    
+    if (inputDiv && colorSelect) {
+        // Get the value (e.g., "Blue") and convert to lowercase for CSS ("blue")
+        const color = colorSelect.value.toLowerCase();
+        inputDiv.style.borderLeftColor = color;
+    }
+}
+
+// List of all available colors in your dropdowns
+const ALL_COLORS = ['Yellow', 'Blue', 'Red', 'Lime', 'Green', 'Aqua', 'Orange', 'Purple'];
+
+function handleColorChange(playerNum) {
+    const changedSelect = document.getElementById(`player${playerNum}color`);
+    const newColor = changedSelect.value;
+
+    // 1. Check for conflicts with other players
+    for (let i = 1; i <= 8; i++) {
+        // Skip the player who just changed their color
+        if (i === playerNum) continue;
+
+        const otherSelect = document.getElementById(`player${i}color`);
+        
+        // If we found a conflict (another player has the same color)
+        if (otherSelect.value === newColor) {
+            
+            // A. Find out which colors are currently taken by EVERYONE
+            const takenColors = new Set();
+            for (let j = 1; j <= 8; j++) {
+                takenColors.add(document.getElementById(`player${j}color`).value);
+            }
+
+            // B. Find the first color in the master list that ISN'T taken
+            const freeColor = ALL_COLORS.find(c => !takenColors.has(c));
+
+            // C. Assign that free color to the OTHER player
+            if (freeColor) {
+                otherSelect.value = freeColor;
+                updateBorderColor(i); // Update their UI border immediately
+            }
+        }
+    }
+
+    // 2. Update the border for the player who actually clicked
+    updateBorderColor(playerNum);
+}
+
+
 function showCopySuccess(btn) {
     btn.innerText = "✅ Copied!";
     btn.style.background = "#2E7D32"; // Darker green
@@ -2795,7 +2869,6 @@ function showCopySuccess(btn) {
         btn.style.background = "#4CAF50";
     }, 3000);
 }
-
 
 window.onload = function() {
 	game = new Game();
@@ -3105,3 +3178,151 @@ window.onload = function() {
 
 
 };
+
+// Function to make an element draggable
+function makeDraggable(element) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+    // --- 1. MOUSE EVENTS (Desktop) ---
+    element.onmousedown = dragMouseDown;
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // Get the mouse cursor position at startup:
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // Calculate the new cursor position:
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        updateElementPosition();
+    }
+
+    // --- 2. TOUCH EVENTS (Mobile) ---
+    element.ontouchstart = dragTouchStart;
+
+    function dragTouchStart(e) {
+        const touch = e.touches[0];
+        pos3 = touch.clientX;
+        pos4 = touch.clientY;
+        
+        // Use event listeners for touch to prevent conflicts
+        document.addEventListener('touchend', closeDragElement, {once: true});
+        document.addEventListener('touchmove', elementDragTouch, {passive: false});
+    }
+
+    function elementDragTouch(e) {
+        // Stop the screen from scrolling while dragging
+        if(e.cancelable) { e.preventDefault(); }
+
+        const touch = e.touches[0];
+        pos1 = pos3 - touch.clientX;
+        pos2 = pos4 - touch.clientY;
+        pos3 = touch.clientX;
+        pos4 = touch.clientY;
+        updateElementPosition();
+    }
+
+    // --- SHARED LOGIC ---
+    function updateElementPosition() {
+        // Set the element's new position:
+        element.style.top = (element.offsetTop - pos2) + "px";
+        element.style.left = (element.offsetLeft - pos1) + "px";
+        // Critical: Unset 'right' so it doesn't fight with 'left'
+        element.style.right = "auto";
+    }
+
+    function closeDragElement() {
+        // Stop moving when mouse button/finger is released:
+        document.onmouseup = null;
+        document.onmousemove = null;
+        
+        // Clean up touch listeners
+        document.removeEventListener('touchmove', elementDragTouch);
+        document.removeEventListener('touchend', closeDragElement);
+    }
+}
+
+function centerOnPlayer() {
+    // 1. Only run on Mobile (Screen width < 1000px)
+    if (window.innerWidth > 1000) return;
+
+    var p = player[turn];
+    var targetId;
+
+    // 2. Determine the target cell ID
+    if (p.jail) {
+        targetId = "jail"; // The specific ID for the jail cell
+    } else {
+        targetId = "cell" + p.position; // e.g., "cell5"
+    }
+    
+    autoDodgeControlPanel(p.position);
+
+    var element = document.getElementById(targetId);
+
+    // 3. Smooth Scroll to center
+    if (element) {
+        element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',  // Vertically center
+            inline: 'center'  // Horizontally center
+        });
+    }
+}
+
+function autoDodgeControlPanel(playerPos) {
+    // 1. Only run on Mobile
+    if (window.innerWidth > 1000) return;
+
+    const control = document.getElementById("control");
+    if (!control) return;
+
+    // 2. Get screen and panel dimensions
+    const panelHeight = control.offsetHeight;
+    const windowHeight = window.innerHeight;
+
+    // 3. Determine Player Location on the Board
+    // Bottom Row: 0 to 10 (Go, Properties, Jail)
+    // Left Row: 11 to 19
+    // Top Row: 20 to 30 (Free Parking, Go To Jail)
+    // Right Row: 31 to 39
+    
+    let targetTop;
+
+    // IF Player is on the Bottom Row (0-10) OR in Jail
+    // The camera will look at the bottom.
+    // -> Move Panel to the TOP.
+    if (player[turn].jail || (playerPos >= 0 && playerPos <= 10)) {
+        targetTop = 20; // 20px from top
+    } 
+    // ELSE (Player is Top, Left, or Right)
+    // The camera will look Top/Center.
+    // -> Move Panel to the BOTTOM.
+    else {
+        targetTop = windowHeight - panelHeight - 20; // 20px from bottom
+    }
+
+    // 4. Animate the Move
+    // Enable CSS transition for smooth gliding
+    control.style.transition = "top 0.6s cubic-bezier(0.25, 1, 0.5, 1)";
+    control.style.top = targetTop + "px";
+    
+    // Critical: Unset bottom so 'top' takes priority
+    control.style.bottom = "auto";
+
+    // 5. Cleanup
+    // Remove the transition after movement finishes so manual dragging feels responsive again
+    setTimeout(() => {
+        control.style.transition = "";
+    }, 700);
+}
