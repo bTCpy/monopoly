@@ -1261,6 +1261,12 @@ function popup(HTML, action, option) {
 			$("#popupbackground").fadeOut(400);
 			
 		if (window.innerWidth <= 1000) $("#control").show();
+		
+		//setTimeout to wait for game logic
+		setTimeout(centerOnPlayer, 50);
+		
+		centerOnPlayer();
+		
 		});
 
 		$("#popupyes").on("click", action);
@@ -1274,6 +1280,12 @@ function popup(HTML, action, option) {
 			$("#popupwrap").hide();
 			$("#popupbackground").fadeOut(400);
 		if (window.innerWidth <= 1000) $("#control").show();
+		
+		//setTimeout to wait for game logic
+		setTimeout(centerOnPlayer, 50);
+		
+		centerOnPlayer();
+		
 		}).on("click", action);
 
 	}
