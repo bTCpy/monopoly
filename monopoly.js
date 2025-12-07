@@ -3292,6 +3292,62 @@ function centerOnPlayer() {
     }
 }
 
+// --- FIX: Handle Screen Rotation / Resize ---
+window.addEventListener('resize', function() {
+    // Wait 100ms for rotation to finish
+    setTimeout(function() {
+        const control = document.getElementById("control");
+        if (!control) return;
+
+        // Check if we are in Desktop Mode
+        if (window.innerWidth > 1000) {
+            // DESKTOP MODE
+            // 1. Remove ONLY the positioning/sizing styles we added for mobile
+            control.style.position = "";
+            control.style.top = "";
+            control.style.left = "";
+            control.style.bottom = "";
+            control.style.right = "";
+            control.style.width = "";
+            control.style.height = "";
+            control.style.zIndex = "";
+            control.style.touchAction = "";
+            
+            // 2. CRITICAL FIX: Do NOT remove 'display'. 
+            // If the game logic set 'display: block' or 'display: none', we must respect it.
+            // However, if the style is 'display: flex' (from our mobile logic), we might want to let it revert.
+            if (control.style.display === 'flex') {
+                control.style.display = ''; // Revert to stylesheet or jQuery default
+            }
+            
+            // Safety: If it became hidden but should be visible (game is active), force show it.
+            // (You can rely on jQuery if loaded, or check computed style)
+            if (window.jQuery && $(control).css('display') === 'none') {
+                 $(control).show();
+            }
+            
+        } else {
+            // MOBILE MODE
+            // 1. Force the Floating Widget layout
+            control.style.position = "fixed";
+            control.style.display = "flex"; // Ensure it uses Flexbox for mobile layout
+            control.style.zIndex = "5000";
+            control.style.width = "fit-content";
+            control.style.height = "fit-content";
+            control.style.touchAction = "none"; // Required for dragging
+            
+            // 2. Snap to default position IF it has no coordinates
+            // (Prevents it from disappearing off-screen if switching views)
+            if (!control.style.top && !control.style.bottom) {
+                control.style.bottom = "10px";
+                control.style.left = "10px";
+                control.style.top = "";
+                control.style.right = "";
+            }
+        }
+    }, 100);
+});
+
 function autoDodgeControlPanel(playerPos) {
     // 1. Only run on Mobile
     if (window.innerWidth > 1000) return;
