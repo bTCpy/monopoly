@@ -3297,7 +3297,13 @@ window.addEventListener('resize', function() {
     // Wait 100ms for rotation to finish
     setTimeout(function() {
         const control = document.getElementById("control");
+		const setupScreen = document.getElementById("setup");
         if (!control) return;
+
+		if (setupScreen.style.display !== "none") {
+            control.style.display = "none";
+            return; 
+        }
 
         // Check if we are in Desktop Mode
         if (window.innerWidth > 1000) {
