@@ -996,7 +996,7 @@ function Game() {
 			// }
 			// document.getElementById("refresh").innerHTML += "<br><br><div><textarea type='text' style='width: 980px;' onclick='javascript:select();' />" + text + "</textarea></div>";
 
-			popup("<p>Congratulations, " + player[1].name + ", you have won the game.</p><div>");
+			//popup("<p>Congratulations, " + player[1].name + ", you have won the game.</p><div>");
 			triggerCashout();
 
 		} else {
