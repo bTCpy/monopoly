@@ -290,6 +290,7 @@
                     if (checkData.status === "paid") {
                         clearInterval(pollInterval);
                         document.getElementById("buyin-modal").style.display = "none";
+						document.getElementById("control").style.display = "none"; 
                         
                         const amountPerPlayer = parseInt(aInput.value) || 1500;
                         const newScale = amountPerPlayer / 1500;
