@@ -984,7 +984,7 @@ function Game() {
 			updateMoney();
 			$("#control").hide();
 			$("#board").hide();
-			$("#refresh").show();
+			//$("#refresh").show();
 
 			// // Display land counts for survey purposes.
 			// var text;
