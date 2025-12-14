@@ -52,7 +52,7 @@ This project is a work in progress. Here is what is coming next:
 *   **Partial Withdrawals:** Enable players to "cash out" their remaining share of the pot if they or the group decides to stop playing early.
 
 ### 📱 UI/UX
-*   **Mobile Optimization:** The current board is best viewed on a desktop. We want to make it playable on mobile phones.
+*   **Mobile Optimization:** The current board is best viewed on a desktop. We want to further improve the mobile experience.
 *   **Sound Effects:** Maybe add "Cha-ching!" sounds when rent is paid.
 *   **Better QR Codes:** Make QR codes clickable on mobile to open wallets directly.
 
