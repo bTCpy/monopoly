@@ -69,7 +69,7 @@ function Game() {
 		$("#popupbackground").hide();
 		$("#popupwrap").hide();
 		
-	        if (window.innerWidth <= 1000) {
+	        if (isMobile()) {
             	$("#control").show();
         	}
 
@@ -1260,7 +1260,7 @@ function popup(HTML, action, option) {
 			$("#popupwrap").hide();
 			$("#popupbackground").fadeOut(400);
 			
-		if (window.innerWidth <= 1000) $("#control").show();
+		if (isMobile()) $("#control").show();
 		
 		//setTimeout to wait for game logic
 		setTimeout(centerOnPlayer, 50);
@@ -1279,7 +1279,7 @@ function popup(HTML, action, option) {
 		$("#popupclose").on("click", function() {
 			$("#popupwrap").hide();
 			$("#popupbackground").fadeOut(400);
-		if (window.innerWidth <= 1000) $("#control").show();
+		if (isMobile()) $("#control").show();
 		
 		//setTimeout to wait for game logic
 		setTimeout(centerOnPlayer, 50);
@@ -1295,7 +1295,7 @@ function popup(HTML, action, option) {
 		$("#popupwrap").show();
 		
 	// --- AUTO-SCROLL TO POPUP ON MOBILE ---
-        if (window.innerWidth <= 1000) {
+        if (isMobile()) {
             var popupElement = document.getElementById("popupwrap");
             if (popupElement) {
                 popupElement.scrollIntoView({
@@ -3266,7 +3266,7 @@ function makeDraggable(element) {
 
 function centerOnPlayer() {
     // 1. Only run on Mobile (Screen width < 1000px)
-    if (window.innerWidth > 1000) return;
+    if (!isMobile()) return;
 
     var p = player[turn];
     var targetId;
@@ -3306,7 +3306,7 @@ window.addEventListener('resize', function() {
         }
 
         // Check if we are in Desktop Mode
-        if (window.innerWidth > 1000) {
+        if (!isMobile()) {
             // DESKTOP MODE
             // 1. Remove ONLY the positioning/sizing styles we added for mobile
             control.style.position = "";
@@ -3356,7 +3356,7 @@ window.addEventListener('resize', function() {
 
 function autoDodgeControlPanel(playerPos) {
     // 1. Only run on Mobile
-    if (window.innerWidth > 1000) return;
+    if (!isMobile()) return;
 
     const control = document.getElementById("control");
     if (!control) return;
@@ -3399,4 +3399,8 @@ function autoDodgeControlPanel(playerPos) {
     setTimeout(() => {
         control.style.transition = "";
     }, 700);
+}
+
+function isMobile() {
+    return window.innerWidth <= 1000 || window.innerHeight <= 900;
 }
