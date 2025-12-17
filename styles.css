@@ -1039,7 +1039,7 @@ a[href*="github.com"] .social-icon:hover {
     text-shadow: 0 0 10px rgba(255, 153, 0, 0.3);
 }
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (max-width: 1000px), only screen and (max-height: 900px) {
 
     /* 1. Pin Control Panel to Bottom of Screen */
     #control {
