@@ -984,6 +984,7 @@ function Game() {
 			updateMoney();
 			$("#control").hide();
 			$("#board").hide();
+			var winnerName = player[1].name;
 			//$("#refresh").show();
 
 			// // Display land counts for survey purposes.
@@ -997,7 +998,7 @@ function Game() {
 			// document.getElementById("refresh").innerHTML += "<br><br><div><textarea type='text' style='width: 980px;' onclick='javascript:select();' />" + text + "</textarea></div>";
 
 			//popup("<p>Congratulations, " + player[1].name + ", you have won the game.</p><div>");
-			triggerCashout();
+			triggerCashout(winnerName);
 
 		} else {
 			play();
@@ -2756,27 +2757,30 @@ function menuitem_onmouseout(element) {
 	return;
 }
 
-async function triggerCashout() {
+async function triggerCashout(winnerName) {
     try {
-        const response = await fetch('/api/cashout', {method: 'POST'});
+        const response = await fetch('/api/cashout', { method: 'POST' });
         const data = await response.json();
 
         if (data.error) {
             alert("Error: " + data.error);
             return;
         }
+
         
-        // 1. Put token in the box
         const tokenBox = document.getElementById("token-display");
         tokenBox.value = data.token;
-        
-        // 2. Show the modal
-        const modal = document.getElementById("cashout-modal");
-        modal.style.display = "flex"; // "flex" centers the content
-        
-        // 3. Console log just in case
-        console.log("WINNING TOKEN:", data.token);
 
+        
+        const title = document.getElementById("cashout-title");
+        title.textContent = `${winnerName} 🎉 YOU WON! 🎉`;
+
+        
+        const modal = document.getElementById("cashout-modal");
+        modal.style.display = "flex";
+
+        //Console log just in case
+        console.log("WINNING TOKEN:", data.token);
     } catch (e) {
         alert("Network Error: Could not cash out.");
     }
