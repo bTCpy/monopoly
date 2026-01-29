@@ -13,6 +13,10 @@ Don't want to install anything? You can try the game right now on our test serve
 
 👉 **[Play Cashu Monopoly](https://cashu-monopoly.onrender.com/)**
 
+OR
+
+ 👉 Try the cypherpunk **[P2P mobile version](https://github.com/bTCpy/cashu-monopoly)**
+
 *Tip: Select "TestNut (Testnet)" in the game setup to play for free without spending real Bitcoin.*
 
 ![Demo](gameplay_final_speed.gif)
